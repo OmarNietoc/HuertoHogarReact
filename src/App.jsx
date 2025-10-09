@@ -6,10 +6,10 @@ import { Routes, Route, Link } from 'react-router-dom'
 import Home from './pages/Home'
 import Productos from './pages/Productos'
 import Login from './pages/Login'
-import PropYState from './pages/propYState'
 import './styles/global.css'
 import Header from './pages/Header'
 import Footer from './pages/Footer'
+import DetalleProducto from './pages/DetalleProducto'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -17,11 +17,12 @@ function App() {
   return (
     <>
       <Header />
-      <main>
+      <main className='container my-5'>
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/productos' element={<Productos />} />
           <Route path='/login' element={<Login />} />
+          <Route path="/productos/:id" element={<DetalleProducto />} />
         </Routes>
       </main>
 
