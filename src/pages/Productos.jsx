@@ -1,7 +1,8 @@
 // src/pages/Productos.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { motion, AnimatePresence } from "framer-motion";
+import '../styles/Productos.css';
 
 function Productos() {
   const [productos, setProductos] = useState([]);
@@ -96,46 +97,54 @@ function Productos() {
         {/* Productos */}
         {!loading && productosFiltrados.length > 0 && (
           <div className="row">
-            {productosFiltrados.map((producto) => (
-              <div
-                key={producto.id}
-                className="col-12 col-sm-6 col-md-4 mb-4"
-                data-category={producto.categoria}
-              >
-                <div className="card product-card h-100">
-                  {producto.oferta && (
-                    <span className="offer-badge badge position-absolute m-2">
-                      {producto.oferta}
-                    </span>
-                  )}
-
-                  <Link to={`/productos/${producto.id}`}>
-                    <img
-                      src={producto.imagen}
-                      className="card-img-top"
-                      alt={producto.nombre}
-                    />
-                  </Link>
-
-                  <div className="card-body">
-                    <h5 className="card-title">
-                      {producto.nombre}{" "}
-                      <span className="badge bg-verde">{producto.id}</span>
-                    </h5>
-                    <p className="card-text">{producto.descripcion}</p>
-
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="price">
-                        ${producto.precio} CLP/{producto.unid}
+            <AnimatePresence>
+              {productosFiltrados.map((producto) => (
+                <motion.div
+                  key={producto.id}
+                  className="col-12 col-sm-6 col-md-4 mb-4"
+                  data-category={producto.categoria}
+                  layout // habilita animación de layout
+                  layoutId={`producto-${producto.id}`} // ID único para cada card
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="card product-card h-100">
+                    {producto.oferta && (
+                      <span className="offer-badge badge position-absolute m-2">
+                        {producto.oferta}
                       </span>
-                      <button className="btn btn-primary btn-agregar-carrito">
-                        <i className="bi bi-cart-plus"></i> Añadir
-                      </button>
+                    )}
+
+                    <Link to={`/productos/${producto.id}`}>
+                      <img
+                        src={producto.imagen}
+                        className="card-img-top"
+                        alt={producto.nombre}
+                      />
+                    </Link>
+
+                    <div className="card-body">
+                      <h5 className="card-title">
+                        {producto.nombre}{" "}
+                        <span className="badge bg-verde">{producto.id}</span>
+                      </h5>
+                      <p className="card-text">{producto.descripcion}</p>
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="price">
+                          ${producto.precio.toLocaleString()} CLP/{producto.unid}
+                        </span>
+                        <button className="btn btn-primary btn-agregar-carrito">
+                          <i className="bi bi-cart-plus"></i> Añadir
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
 

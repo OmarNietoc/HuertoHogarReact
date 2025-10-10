@@ -1,0 +1,64 @@
+/* ===================== BLOG ===================== */
+
+/* 🎥 Hero exclusivo para el blog con video de fondo */
+.blog-hero {
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  background-color: #000000; /* fallback si el video no carga */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blog-hero video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: auto;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.65);
+}
+
+/* Overlay del texto */
+.blog-hero .hero-overlay {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .blog-hero {
+    height: 40vh;
+  }
+}
+
+.background-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: auto;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.65);
+}
+
+/*== Cards de Blog =========*/
+.ver-mas {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.ver-mas:hover {
+  color: #3bb273; /* tono más claro de verde */
+}

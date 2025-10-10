@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import Slider from "react-slick";
+import "../styles/Productos.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export default function DetalleProducto() {
-  const { id } = useParams(); // obtenemos el id del producto desde la URL
+  const { id } = useParams(); 
   const [producto, setProducto] = useState(null);
   const [categoria, setCategoria] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
@@ -20,15 +24,24 @@ export default function DetalleProducto() {
         const productosData = await productosRes.json();
         const categoriasData = await categoriasRes.json();
 
+        // Producto actual
         const encontrado = productosData.find((p) => String(p.id) === id);
         setProducto(encontrado);
 
+        // Categoría del producto
         const cat = categoriasData.find((c) => c.id === encontrado?.categoria);
         setCategoria(cat);
 
-        const relacionados = productosData.filter(
-          (p) => p.categoria === encontrado?.categoria && p.id !== id
-        );
+        // Productos relacionados: mismos primero, luego otros, máximo 6
+        const relacionados = [
+          ...productosData.filter(
+            (p) => p.categoria === encontrado?.categoria && p.id !== id
+          ),
+          ...productosData.filter(
+            (p) => p.categoria !== encontrado?.categoria
+          )
+        ].slice(0, 6);
+
         setProductosRelacionados(relacionados);
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -57,8 +70,22 @@ export default function DetalleProducto() {
   if (loading) return <p className="text-center my-5">Cargando producto...</p>;
   if (!producto) return <p className="text-center my-5 text-danger">Producto no encontrado</p>;
 
+  // Configuración del carrusel
+  const settings = {
+    dots: false,
+    infinite: productosRelacionados.length > 4,
+    speed: 500,
+    slidesToShow: Math.min(productosRelacionados.length, 4),
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 992, settings: { slidesToShow: Math.min(productosRelacionados.length, 3) } },
+      { breakpoint: 768, settings: { slidesToShow: Math.min(productosRelacionados.length, 2) } },
+      { breakpoint: 576, settings: { slidesToShow: 1 } },
+    ],
+  };
+
   return (
-    <main className="container my-5">
+    <>
       <section className="bg-light py-5 px-4 rounded shadow-sm">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <Link to="/productos" className="btn btn-primary me-3">
@@ -67,6 +94,7 @@ export default function DetalleProducto() {
         </div>
 
         <div className="row g-4">
+          {/* Imagen del producto */}
           <div className="col-md-6">
             <img
               src={producto.imagen}
@@ -75,19 +103,22 @@ export default function DetalleProducto() {
             />
           </div>
 
+          {/* Información del producto */}
           <div className="col-md-6 d-flex flex-column justify-content-start producto-info">
             <h2>{producto.nombre}</h2>
             <p className="text-secondary">Código: {producto.id}</p>
             <p>{producto.descripcion}</p>
-            <h3 className="text-success fw-bold">${producto.precio.toLocaleString()}</h3>
+            <span className="priceUnit">
+              ${producto.precio.toLocaleString()} CLP/{producto.unid}
+            </span>
 
-            <div className="d-flex align-items-center mb-3">
+            <div className="d-flex align-items-center mb-3 mt-3">
               <input
                 type="number"
                 min="1"
                 value={cantidad}
                 onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
-                className="form-control mt-3"
+                className="form-control"
                 style={{ width: "15%" }}
               />
             </div>
@@ -101,6 +132,7 @@ export default function DetalleProducto() {
           </div>
         </div>
 
+        {/* Información de la categoría */}
         {categoria && (
           <div className="row mt-5">
             <div className="col">
@@ -113,37 +145,38 @@ export default function DetalleProducto() {
         )}
       </section>
 
-      {/* Productos relacionados */}
+      {/* Carrusel de productos relacionados */}
       {productosRelacionados.length > 0 && (
-        <div className="row mt-4">
-          <div className="col">
+        <section className="mt-5 fluid">
             <h5>Otros usuarios también llevaron:</h5>
-            <div className="d-flex flex-wrap gap-3">
-              {productosRelacionados.map((prod) => (
-                <div key={prod.id} className="card" style={{ width: "14rem" }}>
+          
+          <Slider {...settings}>
+            {productosRelacionados.map((prod) => (
+              <div key={prod.id} className="px-2">
+                <div className="card producto-relacionado">
                   <Link to={`/productos/${prod.id}`}>
                     <img
                       src={prod.imagen}
                       className="card-img-top"
                       alt={prod.nombre}
                     />
-                  </Link>  
-
+                  </Link>
                   <div className="card-body">
                     <h6 className="card-title">{prod.nombre}</h6>
-                    <p className="card-text text-success fw-bold">
-                      ${prod.precio.toLocaleString()}
+                    <p className="price card-text text-success fw-bold">
+                      ${prod.precio.toLocaleString()} CLP/{prod.unid}
                     </p>
                     <Link to={`/productos/${prod.id}`} className="btn btn-outline-primary btn-sm">
                       Ver detalle
                     </Link>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </div>
+            ))}
+          </Slider>
+        </section>
       )}
-    </main>
+  </>
   );
+
 }

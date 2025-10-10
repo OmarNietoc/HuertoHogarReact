@@ -1,0 +1,13 @@
+/* ===================== Login ===================== */
+.login-container {
+    padding-top: 10px;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+}
+.login-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2rem;
+}

@@ -1,0 +1,69 @@
+[
+  {
+    "id": 1,
+    "title": "Smoothie verde con plátano y espinaca",
+    "img": "/img/products/bananas.jpg",
+    "desc": "Un batido lleno de energía natural. Perfecto para comenzar tu día con fuerza y vitalidad.",
+    "content": [
+      "1 plátano maduro 🍌",
+      "1 taza de espinacas frescas 🥬",
+      "1 vaso de leche o bebida vegetal 🥛",
+      "Mezcla todo en licuadora y disfruta un impulso saludable 🌿"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Zanahorias orgánicas: color, sabor y salud",
+    "img": "/img/products/carrots.jpg",
+    "desc": "Descubre por qué incluir zanahorias en tu dieta puede mejorar tu piel, visión y bienestar general.",
+    "content": [
+      "Ricas en betacarotenos (vitamina A).",
+      "Ayudan a la vista y a mantener una piel sana.",
+      "Ideales en ensaladas o jugos frescos."
+    ]
+  },
+  {
+    "id": 3,
+    "title": "3 usos deliciosos para tu miel orgánica",
+    "img": "/img/products/honey.jpg",
+    "desc": "Endulza tu vida naturalmente con miel pura, sin aditivos. Aquí te dejamos ideas sencillas y saludables.",
+    "content": [
+      "Añádela a tu té o café.",
+      "Úsala en aderezos para ensaladas.",
+      "Mézclala con avena y frutas en el desayuno."
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Naranjas Valencia: vitamina C desde el huerto",
+    "img": "/img/products/oranges2.jpg",
+    "desc": "Un clásico lleno de frescura y energía. Aprende a aprovechar cada parte de esta fruta.",
+    "content": [
+      "Exprímelas para jugos naturales.",
+      "Ralla su cáscara para postres.",
+      "Prepara mermelada casera sin conservantes."
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Pimientos tricolores: el arcoíris de tu cocina",
+    "img": "/img/products/peppers.jpg",
+    "desc": "Combina colores y sabores para comidas más nutritivas y alegres.",
+    "content": [
+      "Asados o salteados, aportan textura y dulzura.",
+      "Ricos en antioxidantes y vitamina C.",
+      "Perfectos para wraps, guisos o ensaladas."
+    ]
+  },
+  {
+    "id": 6,
+    "title": "La quinua orgánica: un superalimento chileno",
+    "img": "/img/products/quinoa.jpg",
+    "desc": "Alta en proteínas y sin gluten, ideal para ensaladas o como base de platos saludables.",
+    "content": [
+      "Cocina 1 taza de quinua en 2 tazas de agua.",
+      "Mezcla con verduras y un toque de miel.",
+      "Sirve tibia o fría, ¡una delicia completa!"
+    ]
+  }
+]

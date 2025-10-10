@@ -1,0 +1,90 @@
+/* ===================== GESTIÓN DE USUARIOS ===================== */
+
+/* Badges de roles de usuario */
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: var(--gris-oscuro) !important;
+}
+
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+/* Efectos hover para badges */
+.badge {
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Tabla de usuarios */
+#tablaUsuarios th {
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    background-color: var(--verde-esmeralda);
+    color: white;
+}
+
+#tablaUsuarios td {
+    vertical-align: middle;
+    background-color: white;
+}
+
+#tablaUsuarios tr:hover td {
+    background-color: var(--fondo-suave);
+}
+
+/* Estilos específicos para celdas de email */
+#tablaUsuarios td:first-child {
+    font-weight: 500;
+    color: var(--verde-esmeralda);
+}
+
+/* Responsividad para tabla de usuarios */
+@media (max-width: 768px) {
+    #tablaUsuarios {
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .btn-action {
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* Estados de hover para botones de usuario */
+.btn-action.btn-warning:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
+}
+
+.btn-action.btn-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+/* Efectos de transición para filas de tabla */
+#tablaUsuarios tr {
+    transition: background-color 0.2s ease;
+}
+
+/* Estilo para el admin logueado (si decides mostrarlo de otra forma) */
+.admin-logged {
+    background-color: rgba(46, 139, 87, 0.1) !important;
+    border-left: 3px solid var(--verde-esmeralda);
+}

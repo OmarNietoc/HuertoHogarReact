@@ -1,0 +1,53 @@
+
+/* ===================== Filtros de Categoría ===================== */
+.category-filter .btn-outline-primary.active,
+.category-filter .btn-outline-primary:active {
+    background-color: var(--verde-esmeralda) !important;
+    border-color: var(--verde-esmeralda) !important;
+    color: #fff !important;
+}
+.category-filter .btn {
+    border-radius: 50px;
+    margin: 0.3rem;
+    padding: 0.5rem 1.2rem;
+}
+
+
+/* Mejoras para cards de productos */
+.product-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+    .product-search .form-control {
+        width: 100% !important;
+    }
+    
+    .category-filter .btn {
+        margin: 0.2rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+.producto-relacionado {
+  width: 14rem; /* antes estaba en style */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.producto-relacionado:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.priceUnit {
+    color: var(--verde-esmeralda);
+    font-weight: 600;
+    font-size: 1.5rem;
+}
