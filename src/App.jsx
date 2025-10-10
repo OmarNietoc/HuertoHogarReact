@@ -13,6 +13,7 @@ import Footer from './pages/Footer'
 import DetalleProducto from './pages/DetalleProducto'
 import Nosotros from './pages/Nosotros'
 import Blogs from './pages/Blogs'
+import Contacto from './pages/Contacto'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -28,6 +29,7 @@ function App() {
           <Route path="/productos/:id" element={<DetalleProducto />} />
           <Route path='/nosotros' element={<Nosotros />} />
           <Route path='/blogs' element ={<Blogs />} />
+          <Route path='/contacto' element ={<Contacto />} />
         </Routes>
       </main>
 
