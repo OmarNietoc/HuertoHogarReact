@@ -1,12 +1,10 @@
 import { NavLink, Link } from "react-router-dom";
-import { useContext } from "react"; // 🧩 1️⃣ Importamos useContext
-import { AuthContext } from "../context/AuthContext"; // 🧩 2️⃣ Importamos nuestro contexto
+import { useAuth } from "../context/AuthContext"; 
 import "../styles/Carrito.css";
 export default function Header() {
-  // 🧩 3️⃣ Obtenemos el usuario y las funciones desde el contexto
-  const { usuario, logout } = useContext(AuthContext);
 
-  // 🧩 4️⃣ Reemplazamos la función anterior por la del contexto
+  const { usuario, logout } = useAuth();
+
   function cerrarSesion() {
     logout();
     console.log("Sesión cerrada");
@@ -86,9 +84,9 @@ export default function Header() {
             </li>
           </ul>
 
-          {/* 🧩 5️⃣ Mostramos contenido condicional según el login */}
+          {/* Mostramos contenido condicional según el login */}
           {!usuario ? (
-            // 👇 Sección visible cuando el usuario NO está logueado
+            // Sección visible cuando el usuario NO está logueado
             <div className="d-flex align-items-center">
               <Link to="/login" className="btn btn-outline-primary me-2">
                 Ingresar
@@ -96,16 +94,16 @@ export default function Header() {
               <Link to="/registro" className="btn btn-primary me-3">
                 Registrarse
               </Link>
-              <Link
+              {/* <Link
                 to="/carrito"
                 className="btn btn-link position-relative cart-icon"
               >
                 <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
                 <span className="cart-count">0</span>
-              </Link>
+              </Link> */}
             </div>
           ) : (
-            // 👇 Sección visible cuando el usuario SÍ está logueado
+            // Sección visible cuando el usuario SÍ está logueado
             <div className="d-flex align-items-center">
               {/* Si es admin, podrías mostrar su panel */}
               {usuario.rol === "admin" && (
