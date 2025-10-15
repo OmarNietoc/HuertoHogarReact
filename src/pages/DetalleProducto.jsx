@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import "../styles/Productos.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useAuth } from "../context/AuthContext"; 
 
 export default function DetalleProducto() {
   const { id } = useParams(); 
@@ -12,6 +13,7 @@ export default function DetalleProducto() {
   const [productosRelacionados, setProductosRelacionados] = useState([]);
   const [cantidad, setCantidad] = useState(1);
   const [loading, setLoading] = useState(true);
+  const { usuario, logout } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +56,12 @@ export default function DetalleProducto() {
   }, [id]);
 
   const agregarAlCarrito = () => {
+
+  if (!usuario) {
+      alert("❌ Debes iniciar sesión para añadir productos al carrito");
+      return;
+    }
+
     const carritoActual = JSON.parse(localStorage.getItem("carritoHuertoHogar")) || [];
     const existente = carritoActual.find((item) => item.id === producto.id);
 
@@ -64,7 +72,7 @@ export default function DetalleProducto() {
     }
 
     localStorage.setItem("carritoHuertoHogar", JSON.stringify(carritoActual));
-    alert(`✅ ${producto.nombre} añadido al carrito`);
+    alert(`✅ ${producto.nombre} añadido al carrito`);  
   };
 
   if (loading) return <p className="text-center my-5">Cargando producto...</p>;

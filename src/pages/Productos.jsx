@@ -136,9 +136,11 @@ function Productos() {
                         <span className="price">
                           ${producto.precio.toLocaleString()} CLP/{producto.unid}
                         </span>
-                        <button className="btn btn-primary btn-agregar-carrito">
-                          <i className="bi bi-cart-plus"></i> Añadir
-                        </button>
+                        <Link to={`/productos/${producto.id}`}>
+                          <button className="btn btn-primary btn-agregar-carrito">
+                            <i className="bi bi-cart-plus"></i> Añadir
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   </div>

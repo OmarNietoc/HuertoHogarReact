@@ -1,9 +1,13 @@
 import { NavLink, Link } from "react-router-dom";
-
+import { useAuth } from "../context/AuthContext"; 
+import "../styles/Carrito.css";
 export default function Header() {
+
+  const { usuario, logout } = useAuth();
+
   function cerrarSesion() {
-    console.log("Cerrando sesión...");
-    // lógica para logout
+    logout();
+    console.log("Sesión cerrada");
   }
 
   return (
@@ -80,48 +84,57 @@ export default function Header() {
             </li>
           </ul>
 
-          {/* Sección visible cuando el usuario NO está logueado */}
-          <div id="LoginRegister" className="d-none d-flex align-items-center">
-            <Link to="/login" className="btn btn-outline-primary me-2">
-              Ingresar
-            </Link>
-            <Link to="/registro" className="btn btn-primary me-3">
-              Registrarse
-            </Link>
-            <Link
-              to="/carrito"
-              className="btn btn-link position-relative cart-icon"
-            >
-              <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
-              <span className="cart-count">0</span>
-            </Link>
-          </div>
-
-          {/* Sección visible cuando el usuario SÍ está logueado */}
-          <div id="userLoggedIn" className="d-flex align-items-center d-none">
-            <div id="panelAdmin" className="d-none d-flex align-items-center">
-              <Link to="/home" className="btn btn-outline-primary me-2">
-                Ir a Panel Admin
+          {/* Mostramos contenido condicional según el login */}
+          {!usuario ? (
+            // Sección visible cuando el usuario NO está logueado
+            <div className="d-flex align-items-center">
+              <Link to="/login" className="btn btn-outline-primary me-2">
+                Ingresar
               </Link>
+              <Link to="/registro" className="btn btn-primary me-3">
+                Registrarse
+              </Link>
+              {/* <Link
+                to="/carrito"
+                className="btn btn-link position-relative cart-icon"
+              >
+                <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
+                <span className="cart-count">0</span>
+              </Link> */}
             </div>
-            <span className="me-2 text-secondary">Bienvenido, </span>
-            <span className="user-email me-3 text-verde fw-bold"></span>
+          ) : (
+            // Sección visible cuando el usuario SÍ está logueado
+            <div className="d-flex align-items-center">
+              {/* Si es admin, podrías mostrar su panel */}
+              {usuario.rol === "admin" && (
+                <Link to="/home" className="btn btn-outline-primary me-2">
+                  Ir a Panel Admin
+                </Link>
+              )}
 
-            <Link
-              to="/carrito"
-              className="btn btn-link position-relative cart-icon me-2"
-            >
-              <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
-              <span className="cart-count">0</span>
-            </Link>
+              <span className="me-2 text-secondary">
+                Bienvenido,&nbsp;
+                <span className="text-verde fw-bold">
+                  {usuario.nombre || usuario.email}
+                </span>
+              </span>
 
-            <button
-              className="btn btn-outline-primary me-2"
-              onClick={cerrarSesion}
-            >
-              <i className="bi bi-box-arrow-right"></i> Cerrar sesión
-            </button>
-          </div>
+              <Link
+                to="/carrito"
+                className="btn btn-link position-relative cart-icon me-2"
+              >
+                <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
+                <span className="cart-count">0</span>
+              </Link>
+
+              <button
+                className="btn btn-outline-primary me-2"
+                onClick={cerrarSesion}
+              >
+                <i className="bi bi-box-arrow-right"></i> Cerrar sesión
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>
