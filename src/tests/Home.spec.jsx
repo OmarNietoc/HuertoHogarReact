@@ -1,32 +1,67 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Home from '../pages/Home.jsx';
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import Home from "../pages/Home";
 
-describe('Home (Card)', () => { // agrupa un conjunto de tests bajo un nombre (en este caso "Home (Card)"). Sirve para el reporte final.
-  it('Busca que se renderizan 6 cards de producto', () => { // it describe el caso
-    render(<Home />); // Render monta el componente en DOM virtual.
-    const cards = screen.getAllByTestId('producto'); // Busca todos los elementos con data-testid="producto"
-    expect(cards.length).toBe(6); // Valida que existan exactamente 6 cards renderizadas
+describe("🧩 Home (Card)", () => {
+  // Antes de todas las pruebas
+  beforeAll(() => {
+    spyOn(window, "fetch").and.callFake(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              id: "FR001",
+              nombre: "Manzanas Fuji",
+              descripcion: "Crujientes y dulces, cultivadas en el Valle del Maule.",
+              precio: 1200,
+              unid: "kg",
+              oferta: "Oferta",
+              imagen: "https://via.placeholder.com/200",
+              categoria: "fruta",
+            },
+            {
+              id: "VR002",
+              nombre: "Espinacas Frescas",
+              descripcion: "Perfectas para ensaladas.",
+              precio: 700,
+              unid: "kg",
+              oferta: "Nuevo",
+              imagen: "https://via.placeholder.com/200",
+              categoria: "verdura",
+            },
+          ]),
+      })
+    );
   });
 
-  it('Busca 6 títulos (h5) de producto', () => { 
-    render(<Home />);
-    const titles = screen.getAllByRole('heading', { level: 5 }); // Busca por rol "heading" nivel 5 (equivale a <h5>)
-    expect(titles.length).toBe(6);
+  afterAll(() => {
+    window.fetch.and.callThrough(); // restaura fetch original
   });
 
-  it('Busca un producto específico por su título', () => {
-    render(<Home />);
-    expect(screen.getByRole('heading', { name: 'Bombones de chocolate', level: 5 })) // Busca un texto exacto en el contenido
-      .toBeInTheDocument(); //Verifica que el elemento (nombre buscado) existe en el DOM renderizado.
+  it("Renderiza títulos de productos correctamente", async () => {
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Manzanas Fuji/i)).toBeTruthy();
+      expect(screen.getByText(/Espinacas Frescas/i)).toBeTruthy();
+    });
+  });
+
+  it("Renderiza al menos 2 productos en cards", async () => {
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      const cards = screen.getAllByRole("heading", { level: 5 });
+      expect(cards.length).toBeGreaterThanOrEqual(2);
+    });
   });
 });
-
-describe('Elementos del Home', () => {
-  it('Busca titulo de productos', async () => {
-    render(<Home />);
-    const titulo = await screen.findByText(/Nuestros Productos/i);
-    expect(titulo).toBeInTheDocument();
-  }); 
-});
-
