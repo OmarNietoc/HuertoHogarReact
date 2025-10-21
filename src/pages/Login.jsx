@@ -1,30 +1,28 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // tu contexto de autenticación
+import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
 import { validarCorreo, validarPassword } from "../utils/validators";
 
-
 export default function Login() {
   const navigate = useNavigate();
- const { usuario, login } = useAuth(); // función que guarda usuario en contexto
+  const { usuario, login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [alerta, setAlerta] = useState(null);
 
-
   const mostrarAlerta = (mensaje, tipo = "info") => {
     setAlerta({ mensaje, tipo });
     setTimeout(() => setAlerta(null), 2500);
   };
 
-  const manejarLogin = (e) => {
+  const manejarLogin = async (e) => {
     e.preventDefault();
 
     if (!validarCorreo(email)) {
-      mostrarAlerta("❌ Correo inválido. Usa @duoc.cl, @profesor.duoc.cl o @gmail.com", "danger");
+      mostrarAlerta("❌ El correo no es valido", "danger");
       return;
     }
 
@@ -33,35 +31,47 @@ export default function Login() {
       return;
     }
 
-    let usuarios = JSON.parse(localStorage.getItem("usuariosHuertoHogar")) || [];
-    if (window.usuariosArray) {
-      usuarios = [...usuarios, ...window.usuariosArray];
+    try {
+      // 🔹 Cargar usuarios base desde public/data/usuarios.json
+      const respuesta = await fetch("/data/usuarios.json");
+      const usuariosBase = await respuesta.json();
+
+      // 🔹 Obtener usuarios guardados en localStorage
+      const usuariosLocal = JSON.parse(localStorage.getItem("usuariosHuertoHogar")) || [];
+
+      // 🔹 Combinar ambos arreglos
+      const usuarios = [...usuariosBase, ...usuariosLocal];
+
+      // 🔹 Buscar coincidencia
+      console.log(usuarios);
+      console.log(email, password);
+      const usuarioValido = usuarios.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (!usuarioValido) {
+        mostrarAlerta("❌ Correo o contraseña incorrectos", "danger");
+        return;
+      }
+
+      // 🔹 Guardar sesión
+      login(usuarioValido);
+      localStorage.setItem("isAdmin", usuarioValido.rol === "admin");
+
+      mostrarAlerta(
+        usuarioValido.rol === "admin"
+          ? "✅ Bienvenido Administrador"
+          : "👋 Inicio de sesión exitoso",
+        "success"
+      );
+
+      setTimeout(() => {
+        navigate(usuarioValido.rol === "admin" ? "/admin" : "/");
+      }, 1200);
+    } catch (error) {
+      console.error("Error al cargar usuarios.json:", error);
+      mostrarAlerta("❌ Error cargando datos de usuarios.", "danger");
     }
-
-    const usuarioValido = usuarios.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (!usuarioValido) {
-      mostrarAlerta("❌ Correo o contraseña incorrectos", "danger");
-      return;
-    }
-
-    // Guardar sesión
-    login(usuarioValido);
-    localStorage.setItem("isAdmin", usuarioValido.rol === "admin");
-    // localStorage.setItem("isAdmin", usuarioValido.rol === "admin" ? "true" : "false");
-
-    mostrarAlerta(
-      usuarioValido.rol === "admin"
-        ? "✅ Bienvenido Administrador"
-        : "👋 Inicio de sesión exitoso",
-      "success"
-    );
-
-    setTimeout(() => {
-      navigate(usuarioValido.rol === "admin" ? "/admin" : "/");
-    }, 1200);
   };
 
   return (
