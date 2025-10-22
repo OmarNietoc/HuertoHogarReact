@@ -1,15 +1,21 @@
 // src/setupTests.js
-import jasmineDom from '@testing-library/jasmine-dom';
+//Configuración global de pruebas con Karma + Jasmine + React Testing Library
+
+import '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 
-beforeAll(() => {
-  // Registra todos los matchers: toBeInTheDocument, toHaveTextContent, etc.
-  jasmine.addMatchers(jasmineDom);
-});
-
+//Limpieza automática del DOM después de cada test
 afterEach(() => {
   cleanup();
 });
 
-// (Opcional) Si tus componentes usan fetch:
-// import 'whatwg-fetch';
+//(Opcional) Mock de fetch global (evita errores en componentes con fetch)
+if (!window.fetch) {
+  window.fetch = () =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+}
+
+console.log('setupTests.js cargado correctamente (Karma + Jasmine)');

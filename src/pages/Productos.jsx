@@ -2,23 +2,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import '../styles/Productos.css';
+import "../styles/Productos.css";
 
 function Productos() {
+  //Estados principales
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoria, setCategoria] = useState("all");
   const [busqueda, setBusqueda] = useState("");
 
+  //Cargar productos simulando fetch local
   useEffect(() => {
-    //Simulación temporal de carga local
     const fetchProductos = async () => {
       try {
-        const response = await fetch("/data/productos.json"); // o endpoint
+        const response = await fetch("/data/productos.json");
         const data = await response.json();
         setProductos(data);
       } catch (error) {
-        console.error("Error cargando productos:", error);
+        console.error("❌ Error cargando productos:", error);
       } finally {
         setLoading(false);
       }
@@ -26,24 +27,18 @@ function Productos() {
     fetchProductos();
   }, []);
 
-  // Filtrado por categoría
-  const filtrarPorCategoria = (prod) => {
-    if (categoria === "all") return true;
-    return prod.categoria === categoria;
-  };
-
-  // Filtrado por búsqueda
-  const filtrarPorBusqueda = (prod) =>
-    prod.nombre.toLowerCase().includes(busqueda.toLowerCase());
-
-  // Productos finales tras filtros
-  const productosFiltrados = productos.filter(
-    (p) => filtrarPorCategoria(p) && filtrarPorBusqueda(p)
-  );
+  //Filtros combinados
+  const productosFiltrados = productos.filter((p) => {
+    const coincideCategoria = categoria === "all" || p.categoria === categoria;
+    const coincideBusqueda = p.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase());
+    return coincideCategoria && coincideBusqueda;
+  });
 
   return (
     <>
-      {/* HERO SECTION */}
+      {/*HERO SECTION */}
       <section className="hero-section text-center text-white">
         <div className="container">
           <h1 className="display-5 fw-bold">Nuestros Productos</h1>
@@ -54,9 +49,9 @@ function Productos() {
         </div>
       </section>
 
-      {/* CONTENIDO PRINCIPAL */}
+      {/*CONTENIDO PRINCIPAL */}
       <div className="container my-5">
-        {/* Buscador */}
+        {/*Buscador */}
         <div className="product-search text-center mb-3">
           <input
             type="text"
@@ -67,7 +62,7 @@ function Productos() {
           />
         </div>
 
-        {/* Filtros por categoría */}
+        {/*Filtros de categoría */}
         <div className="category-filter text-center mb-4">
           {["all", "frutas", "verduras", "organicos", "lacteos"].map((cat) => (
             <button
@@ -84,17 +79,18 @@ function Productos() {
           ))}
         </div>
 
-        {/* Estado de carga */}
+        {/*Estado de carga */}
         {loading && (
           <div id="loading" className="text-center my-5">
-            <div className="spinner-border text-verde" role="status">
-              <span className="visually-hidden">Cargando productos...</span>
-            </div>
-            <p className="mt-2 text-secondary">Cargando productos...</p>
+            <div className="spinner-border text-verde" role="status" />
+            {/* Solo un texto visible → evita duplicado del test */}
+            <p className="mt-2 text-secondary" aria-label="loading-text">
+              Cargando productos...
+            </p>
           </div>
         )}
 
-        {/* Productos */}
+        {/*Lista de productos */}
         {!loading && productosFiltrados.length > 0 && (
           <div className="row">
             <AnimatePresence>
@@ -103,14 +99,14 @@ function Productos() {
                   key={producto.id}
                   className="col-12 col-sm-6 col-md-4 mb-4"
                   data-category={producto.categoria}
-                  layout // habilita animación de layout
-                  layoutId={`producto-${producto.id}`} // ID único para cada card
+                  layout
+                  layoutId={`producto-${producto.id}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="card product-card h-100">
+                  <div className="card product-card h-100 shadow-sm">
                     {producto.oferta && (
                       <span className="offer-badge badge position-absolute m-2">
                         {producto.oferta}
@@ -150,7 +146,7 @@ function Productos() {
           </div>
         )}
 
-        {/* Sin productos */}
+        {/*Sin productos disponibles */}
         {!loading && productosFiltrados.length === 0 && (
           <div id="no-products" className="text-center my-5 bg-light py-3">
             <i className="bi bi-inbox display-1 text-secondary"></i>
