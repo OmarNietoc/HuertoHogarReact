@@ -1,15 +1,43 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Cobertura de Testing – Proyecto Frontend
 
-Currently, two official plugins are available:
+## Datos para Pruebas
+   - "email": "admin@gmail.com"
+    "password": "1234"
+    "rol": "admin"
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+   - "email": "omar@duoc.cl"
+    "password": "1234"
+    "rol": "cliente"
 
-## Expanding the ESLint configuration
+## Alcance
+- Home:
+  - Render de cards y títulos
+  - Precios y etiquetas (Oferta/Nuevo)
+  - Fetch de productos (mock)
+- Login:
+  - Render de campos y botón
+  - Validaciones: email inválido, password fuera de rango
+  - Credenciales incorrectas (mensaje de alerta)
+  - Credenciales válidas (llama a login y navega /admin o /)
+  - Interacciones UI: toggle de visibilidad de contraseña
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# HuertoHogarReact
+## Herramientas
+- Karma 6.4.4 + Jasmine
+- @testing-library/react para consultas y eventos
+- Webpack (babel-loader), ChromeHeadless
 
-.
+## Resultados (ejemplo)
+- Total specs: 12
+- Pasados: 12 / Fallidos: 0
+- Cobertura (si usas karma-coverage):
+  - Lines: 80%
+  - Branches: 70%
+  - Functions: 75%
+  - Statements: 80%
+
+## Brechas / pendientes
+- Cobertura de formularios adicionales (registro / contacto)
+- Tests de errores de red en Login (fetch 500)
+- Pruebas de borde en validadores (e-mails raros, longitudes)
