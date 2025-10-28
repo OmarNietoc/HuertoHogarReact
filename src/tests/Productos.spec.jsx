@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Productos from "../pages/Productos";
 
-describe("🧪 Componente Productos", () => {
+describe("Productos A Vender", () => {
   // Antes de todos los tests, simulamos fetch
   beforeAll(() => {
     spyOn(window, "fetch").and.callFake(() =>
