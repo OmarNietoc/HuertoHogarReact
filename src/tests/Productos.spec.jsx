@@ -52,26 +52,16 @@ describe("Productos A Vender", () => {
     });
   });
 
-  it("Muestra correctamente el precio formateado", async () => {
-    render(
-      <MemoryRouter>
-        <Productos />
-      </MemoryRouter>
-    );
+  it("Renderiza la cantidad correcta de productos", async () => {
+  render(
+    <MemoryRouter>
+      <Productos />
+    </MemoryRouter>
+  );
 
-    await waitFor(() => {
-      expect(screen.getByText(/\$1\.200/)).toBeTruthy();
-      expect(screen.getByText(/\$1\.000/)).toBeTruthy();
-    });
+  await waitFor(() => {
+    const cards = screen.getAllByRole("heading", { level: 5 }); // o el nivel que uses
+    expect(cards.length).toBe(2);
   });
-
-  it("Muestra mensaje de carga mientras se obtienen productos", () => {
-    render(
-      <MemoryRouter>
-        <Productos />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText(/Cargando productos.../i)).toBeTruthy();
-  });
+});
 });

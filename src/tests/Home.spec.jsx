@@ -108,4 +108,18 @@ describe("Home Productos Visibles", () => {
       expect(screen.getAllByText(/Nuevo/i).length).toBeGreaterThan(0);
     });
   });
+
+  it("Renderiza correctamente el botón de descarga de la App Android", async () => {
+  render(
+    <MemoryRouter>
+      <Home />
+    </MemoryRouter>
+  );
+
+  const botonDescarga = await screen.findByRole("link", { name: /Descargar App Android/i });
+  expect(botonDescarga).toBeTruthy();
+  expect(botonDescarga.getAttribute("href")).toBe("/app/huertohogar.apk");
+  expect(botonDescarga.getAttribute("download")).toBe("");
+});
+
 });
