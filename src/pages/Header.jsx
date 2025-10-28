@@ -1,14 +1,46 @@
 import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; 
 import "../styles/Carrito.css";
+import { useState, useEffect } from "react";
 export default function Header() {
 
   const { usuario, logout } = useAuth();
+  const [carritoCount, setCarritoCount] = useState(0);
+
 
   function cerrarSesion() {
     logout();
     console.log("Sesión cerrada");
   }
+
+    // ✅ Función para calcular el total de productos
+  const obtenerConteoCarrito = () => {
+    const carrito = JSON.parse(localStorage.getItem("carritoHuertoHogar")) || [];
+    const total = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    setCarritoCount(total);
+  };
+
+  // ✅ useEffect para escuchar cambios
+  useEffect(() => {
+    obtenerConteoCarrito();
+
+    // Detecta cambios en otras pestañas
+    const handleStorageChange = (e) => {
+      if (e.key === "carritoHuertoHogar") {
+        obtenerConteoCarrito();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    // Detecta cambios locales (cuando se usa dispatchEvent)
+    window.addEventListener("carritoActualizado", obtenerConteoCarrito);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("carritoActualizado", obtenerConteoCarrito);
+    };
+  }, []);
+
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light fixed-top">
@@ -107,7 +139,7 @@ export default function Header() {
             <div className="d-flex align-items-center">
               {/* Si es admin, podrías mostrar su panel */}
               {usuario.rol === "admin" && (
-                <Link to="/home" className="btn btn-outline-primary me-2">
+                <Link to="/admin" className="btn btn-outline-primary me-2">
                   Ir a Panel Admin
                 </Link>
               )}
@@ -124,7 +156,11 @@ export default function Header() {
                 className="btn btn-link position-relative cart-icon me-2"
               >
                 <i className="bi bi-cart3" style={{ fontSize: "1.5rem" }}></i>
-                <span className="cart-count">0</span>
+                {carritoCount > 0 && (
+                  <span className="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {carritoCount}
+                  </span>
+                )}
               </Link>
 
               <button

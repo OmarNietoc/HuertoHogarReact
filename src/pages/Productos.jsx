@@ -11,21 +11,64 @@ function Productos() {
   const [categoria, setCategoria] = useState("all");
   const [busqueda, setBusqueda] = useState("");
 
-  //Cargar productos simulando fetch local
+  //Cargar productos desde localStorage o JSON
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await fetch("/data/productos.json");
-        const data = await response.json();
-        setProductos(data);
+        // PRIMERO intentar cargar desde localStorage (productos agregados/editados)
+        const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+        
+        if (productosStorage && productosStorage.length > 0) {
+          console.log("📦 Productos cargados desde localStorage:", productosStorage);
+          setProductos(productosStorage);
+          setLoading(false);
+        } else {
+          // SI NO HAY en localStorage, cargar desde JSON por defecto
+          console.log("🔄 No hay productos en localStorage, cargando desde JSON...");
+          const response = await fetch("/data/productos.json");
+          const data = await response.json();
+          setProductos(data);
+          
+          // Guardar en localStorage para futuras cargas
+          localStorage.setItem("productosHuertoHogar", JSON.stringify(data));
+          setLoading(false);
+        }
       } catch (error) {
         console.error("❌ Error cargando productos:", error);
-      } finally {
         setLoading(false);
       }
     };
+    
     fetchProductos();
   }, []);
+
+  // Escuchar cambios en localStorage para actualizar en tiempo real
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+      if (productosStorage) {
+        console.log("🔄 Productos actualizados desde localStorage");
+        setProductos(productosStorage);
+      }
+    };
+
+    // Escuchar eventos de storage (cuando se modifica desde otra pestaña/ventana)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // También verificar periódicamente (para cambios en la misma pestaña)
+    const interval = setInterval(() => {
+      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+      if (productosStorage && JSON.stringify(productosStorage) !== JSON.stringify(productos)) {
+        console.log("🔄 Productos actualizados (misma pestaña)");
+        setProductos(productosStorage);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [productos]);
 
   //Filtros combinados
   const productosFiltrados = productos.filter((p) => {

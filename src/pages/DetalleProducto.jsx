@@ -7,46 +7,72 @@ import "slick-carousel/slick/slick-theme.css";
 import { useAuth } from "../context/AuthContext"; 
 
 export default function DetalleProducto() {
-  const { id } = useParams(); 
+    const { id } = useParams(); 
   const [producto, setProducto] = useState(null);
   const [categoria, setCategoria] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
   const [cantidad, setCantidad] = useState(1);
   const [loading, setLoading] = useState(true);
-  const { usuario, logout } = useAuth();
+  const [error, setError] = useState(null);
+  const { usuario } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productosRes, categoriasRes] = await Promise.all([
-          fetch("/data/productos.json"),
-          fetch("/data/categorias.json"),
-        ]);
+        setLoading(true);
+        setError(null);
 
-        const productosData = await productosRes.json();
+        // PRIMERO: Intentar cargar desde localStorage
+        const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+        let productosData = [];
+
+        if (productosStorage && productosStorage.length > 0) {
+          console.log("📦 Cargando productos desde localStorage");
+          productosData = productosStorage;
+        } else {
+          // FALLBACK: Cargar desde JSON si no hay en localStorage
+          console.log("🔄 Cargando productos desde JSON");
+          const productosRes = await fetch("/data/productos.json");
+          productosData = await productosRes.json();
+          
+          // Guardar en localStorage para futuras cargas
+          localStorage.setItem("productosHuertoHogar", JSON.stringify(productosData));
+        }
+
+        // Cargar categorías
+        const categoriasRes = await fetch("/data/categorias.json");
         const categoriasData = await categoriasRes.json();
 
-        // Producto actual
-        const encontrado = productosData.find((p) => String(p.id) === id);
+        // Buscar producto actual
+        const encontrado = productosData.find((p) => String(p.id) === String(id));
+        
+        if (!encontrado) {
+          setError("Producto no encontrado");
+          setLoading(false);
+          return;
+        }
+
         setProducto(encontrado);
 
         // Categoría del producto
-        const cat = categoriasData.find((c) => c.id === encontrado?.categoria);
+        const cat = categoriasData.find((c) => c.id === encontrado.categoria);
         setCategoria(cat);
 
         // Productos relacionados: mismos primero, luego otros, máximo 6
         const relacionados = [
           ...productosData.filter(
-            (p) => p.categoria === encontrado?.categoria && p.id !== id
+            (p) => p.categoria === encontrado.categoria && String(p.id) !== String(id)
           ),
           ...productosData.filter(
-            (p) => p.categoria !== encontrado?.categoria
+            (p) => p.categoria !== encontrado.categoria
           )
         ].slice(0, 6);
 
         setProductosRelacionados(relacionados);
+
       } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("❌ Error cargando datos:", error);
+        setError("Error al cargar el producto");
       } finally {
         setLoading(false);
       }
@@ -55,28 +81,107 @@ export default function DetalleProducto() {
     fetchData();
   }, [id]);
 
-  const agregarAlCarrito = () => {
+  // Escuchar cambios en localStorage para actualizar en tiempo real
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+      if (productosStorage && producto) {
+        const productoActualizado = productosStorage.find((p) => String(p.id) === String(id));
+        if (productoActualizado && JSON.stringify(productoActualizado) !== JSON.stringify(producto)) {
+          console.log("🔄 Producto actualizado desde localStorage");
+          setProducto(productoActualizado);
+        }
+      }
+    };
 
-  if (!usuario) {
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Verificar periódicamente cambios en la misma pestaña
+    const interval = setInterval(() => {
+      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
+      if (productosStorage && producto) {
+        const productoActualizado = productosStorage.find((p) => String(p.id) === String(id));
+        if (productoActualizado && JSON.stringify(productoActualizado) !== JSON.stringify(producto)) {
+          console.log("🔄 Producto actualizado (misma pestaña)");
+          setProducto(productoActualizado);
+        }
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [id, producto]);
+
+  const agregarAlCarrito = () => {
+    if (!usuario) {
       alert("❌ Debes iniciar sesión para añadir productos al carrito");
       return;
     }
 
+    if (!producto) return;
+
     const carritoActual = JSON.parse(localStorage.getItem("carritoHuertoHogar")) || [];
-    const existente = carritoActual.find((item) => item.id === producto.id);
+    const existente = carritoActual.find((item) => String(item.id) === String(producto.id));
 
     if (existente) {
       existente.cantidad += cantidad;
     } else {
-      carritoActual.push({ ...producto, cantidad });
+      carritoActual.push({ 
+        ...producto, 
+        cantidad,
+        // Asegurar que tenemos todos los campos necesarios
+        unid: producto.unid || "unidad"
+      });
     }
 
     localStorage.setItem("carritoHuertoHogar", JSON.stringify(carritoActual));
-    alert(`✅ ${producto.nombre} añadido al carrito`);  
+    window.dispatchEvent(new Event("carritoActualizado"));
+    alert(`✅ ${producto.nombre} añadido al carrito`);
+    
+    // Resetear cantidad
+    setCantidad(1);
   };
 
-  if (loading) return <p className="text-center my-5">Cargando producto...</p>;
-  if (!producto) return <p className="text-center my-5 text-danger">Producto no encontrado</p>;
+  if (loading) {
+    return (
+      <div className="container my-5">
+        <div className="text-center my-5">
+          <div className="spinner-border text-verde" role="status" />
+          <p className="mt-2 text-secondary">Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container my-5">
+        <div className="text-center my-5">
+          <i className="bi bi-exclamation-triangle display-1 text-danger"></i>
+          <h3 className="text-danger">{error}</h3>
+          <Link to="/productos" className="btn btn-primary mt-3">
+            Volver a Productos
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!producto) {
+    return (
+      <div className="container my-5">
+        <div className="text-center my-5">
+          <i className="bi bi-question-circle display-1 text-secondary"></i>
+          <h3 className="text-marron">Producto no encontrado</h3>
+          <Link to="/productos" className="btn btn-primary mt-3">
+            Volver a Productos
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Configuración del carrusel
   const settings = {
