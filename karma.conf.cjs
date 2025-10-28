@@ -5,10 +5,38 @@ module.exports = function (config) {
     frameworks: ["jasmine"],
 
     files: [
-      "src/setupTests.js", // configuración inicial (RTL, matchers, cleanup)
+      // Setups primero
+      "src/tests/setupJestMockPolyfill.js",
+      "src/setupTests.js",
+
+      // Tests
       "src/**/*.spec.js",
       "src/**/*.spec.jsx",
+
+      // Servir estáticos desde /public/img (no incluir en el bundle)
+      {
+        pattern: "public/img/**/*",
+        watched: false,
+        included: false,
+        served: true,
+        nocache: false,
+      },
+
+      // (opcional) si mantienes una subcarpeta products, igual se sirve
+      {
+        pattern: "public/img/products/**/*",
+        watched: false,
+        included: false,
+        served: true,
+        nocache: false,
+      },
     ],
+
+    // Mapeos para que rutas absolutas /img/... funcionen en Karma
+    proxies: {
+      "/img/": "/base/public/img/",
+      "/img/products/": "/base/public/img/products/",
+    },
 
     preprocessors: {
       "src/setupTests.js": ["webpack"],
@@ -28,23 +56,20 @@ module.exports = function (config) {
               options: {
                 presets: [
                   "@babel/preset-env",
-                  [
-                    "@babel/preset-react",
-                    { runtime: "automatic", development: true },
-                  ],
+                  ["@babel/preset-react", { runtime: "automatic", development: true }],
                 ],
               },
             },
           },
           {
-            // ✅ Regla para imágenes (mantiene compatibilidad con fetch local)
+            // Importar imágenes en componentes (si alguna vez las importas)
             test: /\.(png|jpe?g|gif|webp|svg)$/i,
             type: "asset/inline",
           },
           {
-            // ✅ Regla clave para evitar el error con .css
+            // Ignorar CSS en tests (evita errores de import)
             test: /\.css$/i,
-            use: ["null-loader"], // ignora estilos durante los tests
+            use: ["null-loader"],
           },
         ],
       },
@@ -57,7 +82,7 @@ module.exports = function (config) {
     reporters: ["spec", "coverage"],
 
     specReporter: {
-      suppressPassed: false, // muestra los passed
+      suppressPassed: false,
       suppressSkipped: true,
       showSpecTiming: true,
     },
@@ -75,7 +100,7 @@ module.exports = function (config) {
       dir: "coverage/",
     },
 
-    browsers: ["ChromeHeadless"], // sin interfaz, ideal para CI/CD o scripts
+    browsers: ["ChromeHeadless"],
     singleRun: true,
     colors: true,
     logLevel: config.LOG_INFO,

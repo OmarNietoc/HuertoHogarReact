@@ -22,12 +22,12 @@ export default function Login() {
     e.preventDefault();
 
     if (!validarCorreo(email)) {
-      mostrarAlerta("❌ El correo no es valido", "danger");
+      mostrarAlerta("El correo no es valido", "danger");
       return;
     }
 
     if (!validarPassword(password)) {
-      mostrarAlerta("❌ La contraseña debe tener entre 4 y 10 caracteres", "danger");
+      mostrarAlerta("La contraseña debe tener entre 4 y 10 caracteres", "danger");
       return;
     }
 
@@ -50,7 +50,7 @@ export default function Login() {
       );
 
       if (!usuarioValido) {
-        mostrarAlerta("❌ Correo o contraseña incorrectos", "danger");
+        mostrarAlerta("Correo o contraseña incorrectos", "danger");
         return;
       }
 
@@ -70,7 +70,7 @@ export default function Login() {
       }, 1200);
     } catch (error) {
       console.error("Error al cargar usuarios.json:", error);
-      mostrarAlerta("❌ Error cargando datos de usuarios.", "danger");
+      mostrarAlerta("Error cargando datos de usuarios.", "danger");
     }
   };
 
