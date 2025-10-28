@@ -142,6 +142,38 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+            {/* Sección Descarga App Android */}
+      <section className="bg-white py-5 my-5 rounded shadow-sm">
+        <div className="container text-center px-3">
+          <h2 className="fw-bold text-success mb-3">
+            ¡Descarga nuestra App Móvil! 📱
+          </h2>
+          <p className="text-secondary mb-4">
+            Lleva Huerto Hogar contigo y compra tus productos favoritos desde tu
+            teléfono Android, fácil y rápido.
+          </p>
+          <a
+            href="/app/huertohogar.apk"
+            download
+            className="btn btn-success btn-lg d-inline-flex align-items-center gap-2 px-4 py-2 shadow-sm"
+          >
+            <img
+              src="/img/android.png"
+              alt="Logo Android"
+              width="28"
+              height="28"
+              className="me-2"
+            />
+            Descargar App Android
+          </a>
+          <p className="mt-3 text-muted small">
+            Disponible solo para dispositivos Android.
+          </p>
+        </div>
+      </section>
+
+
     </>
   );
 }
