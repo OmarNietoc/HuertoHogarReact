@@ -1,25 +1,11 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useProducts } from "../hooks/useProducts";
 
 export default function Home() {
-  const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: productos = [], isLoading } = useProducts();
 
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        const res = await fetch("/data/productos.json");
-        if (!res.ok) throw new Error("Error al cargar productos");
-        const data = await res.json();
-        setProductos(data);
-      } catch (error) {
-        console.error("Error cargando productos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProductos();
-  }, []);
+  // Tomamos los primeros 3 productos como destacados
+  const productosDestacados = productos.slice(0, 3);
 
   return (
     <>
@@ -48,48 +34,51 @@ export default function Home() {
         </div>
 
         <div className="row mt-3">
-          {loading && <p className="text-center my-5">Cargando productos...</p>}
+          {isLoading && <p className="text-center my-5">Cargando productos...</p>}
 
-          {!loading &&
-            productos
-              .filter((producto) => producto.oferta)
-              .map((producto) => (
-                <div
-                  key={producto.id}
-                  className="col-12 col-sm-6 col-md-4 mb-4"
-                  data-category={producto.categoria}
-                >
-                  <div className="card product-card h-100">
-                    <span className="offer-badge badge position-absolute m-2">
-                      {producto.oferta}
+          {!isLoading &&
+            productosDestacados.map((producto) => (
+              <div
+                key={producto.id}
+                className="col-12 col-sm-6 col-md-4 mb-4"
+              >
+                <div className="card product-card h-100">
+                  {/* Oferta no existe en backend, usamos stock bajo como "destacado" visual */}
+                  {producto.stock <= 5 && (
+                    <span className="offer-badge badge bg-warning position-absolute m-2">
+                      ¡Poco Stock!
                     </span>
-                    <Link to={`/productos/${producto.id}`}>
-                      <img
-                        src={producto.imagen}
-                        className="card-img-top img-fluid"
-                        alt={producto.nombre}
-                      />
-                    </Link>
-                    <div className="card-body d-flex flex-column">
-                      <h5 className="card-title">
-                        {producto.nombre}{" "}
-                        <span className="badge bg-verde">{producto.id}</span>
-                      </h5>
-                      <p className="card-text">{producto.descripcion}</p>
-                      <div className="mt-auto d-flex justify-content-between align-items-center">
-                        <span className="price">
-                          ${producto.precio.toLocaleString()} CLP/{producto.unid}
-                        </span>
-                        <Link to={`/productos/${producto.id}`}>
-                          <button className="btn btn-primary btn-agregar-carrito">
-                            <i className="bi bi-cart-plus"></i> Añadir
-                          </button>
-                        </Link>
-                      </div>
+                  )}
+
+                  <Link to={`/productos/${producto.id}`}>
+                    <img
+                      src={producto.imagen ? `data:image/jpeg;base64,${producto.imagen}` : '/img/placeholder.jpg'}
+                      className="card-img-top img-fluid"
+                      alt={producto.nombre}
+                      style={{ height: '250px', objectFit: 'cover' }}
+                      onError={(e) => { e.target.src = '/img/placeholder.jpg'; }}
+                    />
+                  </Link>
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title">
+                      {producto.nombre}{" "}
+                      <span className="badge bg-verde">{producto.id}</span>
+                    </h5>
+                    <p className="card-text text-truncate">{producto.descripcion}</p>
+                    <div className="mt-auto d-flex justify-content-between align-items-center">
+                      <span className="price">
+                        ${producto.precio?.toLocaleString()} CLP/{producto.unid?.name || 'unid'}
+                      </span>
+                      <Link to={`/productos/${producto.id}`}>
+                        <button className="btn btn-primary btn-agregar-carrito">
+                          <i className="bi bi-cart-plus"></i> Añadir
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
         </div>
 
         <div className="text-center mt-4 py-3">
@@ -143,7 +132,7 @@ export default function Home() {
         </div>
       </section>
 
-            {/* Sección Descarga App Android */}
+      {/* Sección Descarga App Android */}
       <section className="bg-white py-5 my-5 rounded shadow-sm">
         <div className="container text-center px-3">
           <h2 className="fw-bold text-success mb-3">

@@ -1,118 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Slider from "react-slick";
 import "../styles/Productos.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
+import { useProduct, useProducts } from "../hooks/useProducts";
 
 export default function DetalleProducto() {
-    const { id } = useParams(); 
-  const [producto, setProducto] = useState(null);
-  const [categoria, setCategoria] = useState(null);
-  const [productosRelacionados, setProductosRelacionados] = useState([]);
-  const [cantidad, setCantidad] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { id } = useParams();
   const { usuario } = useAuth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Hooks de TanStack Query
+  const { data: producto, isLoading: loadingProducto, isError } = useProduct(id);
+  const { data: todosLosProductos = [] } = useProducts();
 
-        // PRIMERO: Intentar cargar desde localStorage
-        const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
-        let productosData = [];
+  const [cantidad, setCantidad] = useState(1);
 
-        if (productosStorage && productosStorage.length > 0) {
-          console.log("📦 Cargando productos desde localStorage");
-          productosData = productosStorage;
-        } else {
-          // FALLBACK: Cargar desde JSON si no hay en localStorage
-          console.log("🔄 Cargando productos desde JSON");
-          const productosRes = await fetch("/data/productos.json");
-          productosData = await productosRes.json();
-          
-          // Guardar en localStorage para futuras cargas
-          localStorage.setItem("productosHuertoHogar", JSON.stringify(productosData));
-        }
-
-        // Cargar categorías
-        const categoriasRes = await fetch("/data/categorias.json");
-        const categoriasData = await categoriasRes.json();
-
-        // Buscar producto actual
-        const encontrado = productosData.find((p) => String(p.id) === String(id));
-        
-        if (!encontrado) {
-          setError("Producto no encontrado");
-          setLoading(false);
-          return;
-        }
-
-        setProducto(encontrado);
-
-        // Categoría del producto
-        const cat = categoriasData.find((c) => c.id === encontrado.categoria);
-        setCategoria(cat);
-
-        // Productos relacionados: mismos primero, luego otros, máximo 6
-        const relacionados = [
-          ...productosData.filter(
-            (p) => p.categoria === encontrado.categoria && String(p.id) !== String(id)
-          ),
-          ...productosData.filter(
-            (p) => p.categoria !== encontrado.categoria
-          )
-        ].slice(0, 6);
-
-        setProductosRelacionados(relacionados);
-
-      } catch (error) {
-        console.error("❌ Error cargando datos:", error);
-        setError("Error al cargar el producto");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  // Escuchar cambios en localStorage para actualizar en tiempo real
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
-      if (productosStorage && producto) {
-        const productoActualizado = productosStorage.find((p) => String(p.id) === String(id));
-        if (productoActualizado && JSON.stringify(productoActualizado) !== JSON.stringify(producto)) {
-          console.log("🔄 Producto actualizado desde localStorage");
-          setProducto(productoActualizado);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Verificar periódicamente cambios en la misma pestaña
-    const interval = setInterval(() => {
-      const productosStorage = JSON.parse(localStorage.getItem("productosHuertoHogar"));
-      if (productosStorage && producto) {
-        const productoActualizado = productosStorage.find((p) => String(p.id) === String(id));
-        if (productoActualizado && JSON.stringify(productoActualizado) !== JSON.stringify(producto)) {
-          console.log("🔄 Producto actualizado (misma pestaña)");
-          setProducto(productoActualizado);
-        }
-      }
-    }, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [id, producto]);
+  // Lógica de productos relacionados
+  const productosRelacionados = producto ? [
+    ...todosLosProductos.filter(
+      (p) => p.categoria?.id === producto.categoria?.id && String(p.id) !== String(id)
+    ),
+    ...todosLosProductos.filter(
+      (p) => p.categoria?.id !== producto.categoria?.id
+    )
+  ].slice(0, 6) : [];
 
   const agregarAlCarrito = () => {
     if (!usuario) {
@@ -125,26 +38,29 @@ export default function DetalleProducto() {
     const carritoActual = JSON.parse(localStorage.getItem("carritoHuertoHogar")) || [];
     const existente = carritoActual.find((item) => String(item.id) === String(producto.id));
 
+    // Preparar objeto para carrito (asegurando imagen base64 si es necesario)
+    const productoCarrito = {
+      ...producto,
+      // Si la imagen viene sin prefijo, se lo agregamos para que se vea en el carrito si este usa img src directo
+      // Pero mejor guardamos la data tal cual y el componente de carrito que se encargue del src
+      cantidad,
+      unid: producto.unid?.name || "unidad"
+    };
+
     if (existente) {
       existente.cantidad += cantidad;
     } else {
-      carritoActual.push({ 
-        ...producto, 
-        cantidad,
-        // Asegurar que tenemos todos los campos necesarios
-        unid: producto.unid || "unidad"
-      });
+      carritoActual.push(productoCarrito);
     }
 
     localStorage.setItem("carritoHuertoHogar", JSON.stringify(carritoActual));
     window.dispatchEvent(new Event("carritoActualizado"));
     alert(`✅ ${producto.nombre} añadido al carrito`);
-    
-    // Resetear cantidad
+
     setCantidad(1);
   };
 
-  if (loading) {
+  if (loadingProducto) {
     return (
       <div className="container my-5">
         <div className="text-center my-5">
@@ -155,26 +71,12 @@ export default function DetalleProducto() {
     );
   }
 
-  if (error) {
+  if (isError || !producto) {
     return (
       <div className="container my-5">
         <div className="text-center my-5">
           <i className="bi bi-exclamation-triangle display-1 text-danger"></i>
-          <h3 className="text-danger">{error}</h3>
-          <Link to="/productos" className="btn btn-primary mt-3">
-            Volver a Productos
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!producto) {
-    return (
-      <div className="container my-5">
-        <div className="text-center my-5">
-          <i className="bi bi-question-circle display-1 text-secondary"></i>
-          <h3 className="text-marron">Producto no encontrado</h3>
+          <h3 className="text-danger">Producto no encontrado o error de carga</h3>
           <Link to="/productos" className="btn btn-primary mt-3">
             Volver a Productos
           </Link>
@@ -210,9 +112,10 @@ export default function DetalleProducto() {
           {/* Imagen del producto */}
           <div className="col-md-6">
             <img
-              src={producto.imagen}
+              src={producto.imagen ? `data:image/jpeg;base64,${producto.imagen}` : '/img/placeholder.jpg'}
               alt={producto.nombre}
               className="img-fluid rounded"
+              onError={(e) => { e.target.src = '/img/placeholder.jpg'; }}
             />
           </div>
 
@@ -222,13 +125,18 @@ export default function DetalleProducto() {
             <p className="text-secondary">Código: {producto.id}</p>
             <p>{producto.descripcion}</p>
             <span className="priceUnit">
-              ${producto.precio.toLocaleString()} CLP/{producto.unid}
+              ${producto.precio.toLocaleString()} CLP/{producto.unid?.name || 'unid'}
             </span>
+
+            {producto.stock <= 5 && (
+              <p className="text-warning fw-bold mt-2">¡Quedan pocas unidades! (Stock: {producto.stock})</p>
+            )}
 
             <div className="d-flex align-items-center mb-3 mt-3">
               <input
                 type="number"
                 min="1"
+                max={producto.stock}
                 value={cantidad}
                 onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
                 className="form-control"
@@ -239,20 +147,21 @@ export default function DetalleProducto() {
             <button
               className="btn btn-primary btn-agregar-carrito"
               onClick={agregarAlCarrito}
+              disabled={producto.stock === 0}
             >
-              Añadir al carrito
+              {producto.stock === 0 ? "Sin Stock" : "Añadir al carrito"}
             </button>
           </div>
         </div>
 
         {/* Información de la categoría */}
-        {categoria && (
+        {producto.categoria && (
           <div className="row mt-5">
             <div className="col">
               <p className="fw-semibold">
-                Categoría: <span>{categoria.nombre}</span>
+                Categoría: <span>{producto.categoria.name}</span>
               </p>
-              <p>{categoria.descripcion}</p>
+              {/* Backend category model doesn't have description currently */}
             </div>
           </div>
         )}
@@ -261,23 +170,24 @@ export default function DetalleProducto() {
       {/* Carrusel de productos relacionados */}
       {productosRelacionados.length > 0 && (
         <section className="mt-5 fluid">
-            <h5>Otros usuarios también llevaron:</h5>
-          
+          <h5>Otros usuarios también llevaron:</h5>
+
           <Slider {...settings}>
             {productosRelacionados.map((prod) => (
               <div key={prod.id} className="px-2">
                 <div className="card producto-relacionado">
                   <Link to={`/productos/${prod.id}`}>
                     <img
-                      src={prod.imagen}
+                      src={prod.imagen ? `data:image/jpeg;base64,${prod.imagen}` : '/img/placeholder.jpg'}
                       className="card-img-top"
                       alt={prod.nombre}
+                      onError={(e) => { e.target.src = '/img/placeholder.jpg'; }}
                     />
                   </Link>
                   <div className="card-body">
                     <h6 className="card-title">{prod.nombre}</h6>
                     <p className="price card-text text-success fw-bold">
-                      ${prod.precio.toLocaleString()} CLP/{prod.unid}
+                      ${prod.precio.toLocaleString()} CLP/{prod.unid?.name || 'unid'}
                     </p>
                     <Link to={`/productos/${prod.id}`} className="btn btn-outline-primary btn-sm">
                       Ver detalle
@@ -289,7 +199,7 @@ export default function DetalleProducto() {
           </Slider>
         </section>
       )}
-  </>
+    </>
   );
-
 }
+

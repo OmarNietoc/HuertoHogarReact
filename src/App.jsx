@@ -24,6 +24,7 @@ import Registro from './pages/Registro'
 import AdminHome from './pages/admin/AdminHome';
 import AdminUsuarios from './pages/admin/AdminUsuarios';
 import AdminProductos from './pages/admin/AdminProductos';
+import ShoppyTest from './components/ShoppyTest';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -43,6 +44,7 @@ function App() {
         <Route path="/politicas" element={<Politicas />} />
         <Route path="/tyc" element={<Tyc />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/test-shoppy" element={<ShoppyTest />} />
       </Route>
 
       {/* Rutas admin */}
