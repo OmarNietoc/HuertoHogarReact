@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
 import { validarCorreo, validarPassword } from "../utils/validators";
+import { shoppyService } from "../services/shoppyService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -32,45 +33,38 @@ export default function Login() {
     }
 
     try {
-      // 🔹 Cargar usuarios base desde public/data/usuarios.json
-      const respuesta = await fetch("/data/usuarios.json");
-      const usuariosBase = await respuesta.json();
+      const data = await shoppyService.login({ email, password });
 
-      // 🔹 Obtener usuarios guardados en localStorage
-      const usuariosLocal = JSON.parse(localStorage.getItem("usuariosHuertoHogar")) || [];
+      // Mapear respuesta del backend al formato esperado por el contexto
+      const usuarioLogueado = {
+        id: data.id,
+        nombre: data.username, // El backend devuelve username (email) o nombre? Revisar JwtResponse
+        email: data.email,
+        rol: data.roles.includes("ROLE_ADMIN") ? "admin" : "cliente",
+        token: data.token
+      };
 
-      // 🔹 Combinar ambos arreglos
-      const usuarios = [...usuariosBase, ...usuariosLocal];
-
-      // 🔹 Buscar coincidencia
-      console.log(usuarios);
-      console.log(email, password);
-      const usuarioValido = usuarios.find(
-        (u) => u.email === email && u.password === password
-      );
-
-      if (!usuarioValido) {
-        mostrarAlerta("Correo o contraseña incorrectos", "danger");
-        return;
-      }
-
-      // 🔹 Guardar sesión
-      login(usuarioValido);
-      localStorage.setItem("isAdmin", usuarioValido.rol === "admin");
+      login(usuarioLogueado);
+      localStorage.setItem("isAdmin", usuarioLogueado.rol === "admin");
 
       mostrarAlerta(
-        usuarioValido.rol === "admin"
+        usuarioLogueado.rol === "admin"
           ? "✅ Bienvenido Administrador"
           : "👋 Inicio de sesión exitoso",
         "success"
       );
 
       setTimeout(() => {
-        navigate(usuarioValido.rol === "admin" ? "/admin" : "/");
+        navigate(usuarioLogueado.rol === "admin" ? "/admin" : "/");
       }, 1200);
+
     } catch (error) {
-      console.error("Error al cargar usuarios.json:", error);
-      mostrarAlerta("Error cargando datos de usuarios.", "danger");
+      console.error("Error en login:", error);
+      if (error.response && error.response.status === 401) {
+        mostrarAlerta("Correo o contraseña incorrectos", "danger");
+      } else {
+        mostrarAlerta("Error al iniciar sesión. Intente más tarde.", "danger");
+      }
     }
   };
 

@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { shoppyService } from '../services/shoppyService';
+import { shoppyService } from '../services/shoppyService.js';
 
 // Hook para obtener todos los productos
 export const useProducts = () => {

@@ -39,7 +39,7 @@ export default function AdminProductos() {
         unidadId: '',
         stock: 0,
         stockMinimo: 0,
-        activo: true
+        activo: 1
     });
 
     const mostrarAlerta = (message, type = 'danger') => {
@@ -71,7 +71,7 @@ export default function AdminProductos() {
             unidadId: '',
             stock: 0,
             stockMinimo: 0,
-            activo: true
+            activo: 1
         });
     };
 
@@ -113,7 +113,7 @@ export default function AdminProductos() {
             unidadId: producto.unid?.id || '',
             stock: producto.stock || 0,
             stockMinimo: producto.stockMinimo || 0,
-            activo: producto.activo
+            activo: producto.activo === 1 ? 1 : 0
         });
         setShowEditar(true);
     };
@@ -141,7 +141,10 @@ export default function AdminProductos() {
             await createMutation.mutateAsync({
                 ...formData,
                 categoriaId: Number(formData.categoriaId),
-                unidadId: Number(formData.unidadId)
+                unidadId: Number(formData.unidadId),
+                stock: Number(formData.stock),
+                stockMinimo: formData.stockMinimo ? Number(formData.stockMinimo) : 0,
+                activo: formData.activo ? 1 : 0
             });
             mostrarAlerta('Producto agregado exitosamente', 'success');
             setShowRegistrar(false);
@@ -168,7 +171,10 @@ export default function AdminProductos() {
                 data: {
                     ...formData,
                     categoriaId: Number(formData.categoriaId),
-                    unidadId: Number(formData.unidadId)
+                    unidadId: Number(formData.unidadId),
+                    stock: Number(formData.stock),
+                    stockMinimo: formData.stockMinimo ? Number(formData.stockMinimo) : 0,
+                    activo: formData.activo ? 1 : 0
                 }
             });
             mostrarAlerta('Producto actualizado exitosamente', 'success');

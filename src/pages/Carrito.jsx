@@ -65,7 +65,20 @@ const [carrito, setCarrito] = useState(() => {
               <div key={producto.id} className="list-group-item mb-3">
                 <div className="row align-items-center">
                   <div className="col-md-3">
-                    <img src={producto.imagen} alt={producto.nombre} className="img-fluid rounded" />
+                    <img
+                      src={
+                        producto.imagen
+                          ? (producto.imagen.startsWith("data:")
+                              ? producto.imagen
+                              : `data:image/jpeg;base64,${producto.imagen}`)
+                          : "/img/placeholder-product.jpg"
+                      }
+                      alt={producto.nombre}
+                      className="img-fluid rounded"
+                      onError={(e) => {
+                        e.target.src = "/img/placeholder-product.jpg";
+                      }}
+                    />
                   </div>
                   <div className="col-md-5 d-flex align-items-start">
                     <div>
