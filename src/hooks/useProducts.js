@@ -7,7 +7,7 @@ export const useProducts = () => {
     return useQuery({
         queryKey: ['products'],
         queryFn: shoppyService.getProducts,
-        staleTime: 1000 * 60 * 5, // 5 minutos
+        staleTime: 0, // Refrescar siempre al montar
     });
 };
 

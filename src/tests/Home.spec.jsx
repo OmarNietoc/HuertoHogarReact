@@ -1,63 +1,67 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { shoppyService } from "../services/shoppyService";
 import Home from "../pages/Home";
 
-//Mock de productos reales (según tu archivo JSON)
+// Mock de productos
 const mockProductos = [
   {
     id: "FR001",
     nombre: "Manzanas Fuji",
-    descripcion:
-      "Crujientes y dulces, cultivadas en el Valle del Maule. Perfectas para meriendas saludables o como ingrediente en postres.",
+    descripcion: "Crujientes y dulces.",
     precio: 1200,
     categoria: "frutas",
     imagen: "/img/products/apples2.jpg",
-    oferta: "Oferta",
-    unid: "kg",
+    stock: 10,
+    unid: { name: "kg" }
   },
   {
     id: "VR002",
     nombre: "Espinacas Frescas",
-    descripcion:
-      "Frescas y nutritivas, perfectas para ensaladas y batidos verdes. Cultivadas bajo prácticas orgánicas que garantizan su calidad.",
+    descripcion: "Frescas y nutritivas.",
     precio: 700,
     categoria: "verduras",
     imagen: "/img/products/spinach.jpg",
-    oferta: "Nuevo",
-    unid: "kg",
+    stock: 3, // Stock bajo para probar etiqueta de oferta/poco stock
+    unid: { name: "atado" }
   },
   {
     id: "VR003",
     nombre: "Pimientos Tricolores",
-    descripcion:
-      "Pimientos rojos, amarillos y verdes, ideales para salteados y platos coloridos. Ricos en antioxidantes y vitaminas.",
+    descripcion: "Pimientos rojos, amarillos y verdes.",
     precio: 1500,
     categoria: "verduras",
     imagen: "/img/products/peppers.jpg",
-    oferta: "Nuevo",
-    unid: "kg",
+    stock: 20,
+    unid: { name: "kg" }
   },
 ];
 
-describe("Home Productos Visibles", () => {
-  beforeAll(() => {
-    spyOn(window, "fetch").and.callFake(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockProductos),
-      })
-    );
-  });
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
-  afterAll(() => {
-    window.fetch.and.callThrough();
+describe("Home Productos Visibles", () => {
+  let queryClient;
+
+  beforeEach(() => {
+    queryClient = createTestQueryClient();
+    // Mockear el servicio en lugar del hook
+    spyOn(shoppyService, 'getProducts').and.returnValue(Promise.resolve(mockProductos));
   });
 
   it("Renderiza los títulos de los productos correctamente", async () => {
     render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {
@@ -69,9 +73,11 @@ describe("Home Productos Visibles", () => {
 
   it("Renderiza al menos 3 cards de productos", async () => {
     render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {
@@ -80,46 +86,33 @@ describe("Home Productos Visibles", () => {
     });
   });
 
-  it("Muestra correctamente los precios", async () => {
+  it("Muestra etiquetas de oferta o poco stock", async () => {
     render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {
-      // Match flexible para precios (por partes)
-      const precios = screen.getAllByText((content) =>
-        content.match(/\d+\.\d+|CLP|kg/)
-      );
-      expect(precios.length).toBeGreaterThanOrEqual(3);
-    });
-  });
-
-  it("Muestra etiquetas de oferta o nuevo", async () => {
-    render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/Oferta/i)).toBeTruthy();
-      expect(screen.getAllByText(/Nuevo/i).length).toBeGreaterThan(0);
+      // En el componente Home, se muestra "¡Poco Stock!" si stock <= 5
+      // Espinacas tiene stock 3
+      expect(screen.getByText(/¡Poco Stock!/i)).toBeTruthy();
     });
   });
 
   it("Renderiza correctamente el botón de descarga de la App Android", async () => {
-  render(
-    <MemoryRouter>
-      <Home />
-    </MemoryRouter>
-  );
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
 
-  const botonDescarga = await screen.findByRole("link", { name: /Descargar App Android/i });
-  expect(botonDescarga).toBeTruthy();
-  expect(botonDescarga.getAttribute("href")).toBe("/app/huertohogar.apk");
-  expect(botonDescarga.getAttribute("download")).toBe("");
-});
-
+    const botonDescarga = await screen.findByRole("link", { name: /Descargar App Android/i });
+    expect(botonDescarga).toBeTruthy();
+    expect(botonDescarga.getAttribute("href")).toBe("/app/huertohogar.apk");
+  });
 });

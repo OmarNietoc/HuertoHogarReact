@@ -1,43 +1,21 @@
-# React + Vite
+# HuertoHogar React
 
-# Cobertura de Testing – Proyecto Frontend
+Frontend en React + Vite para la experiencia de compra y gestión de HuertoHogar. Consume los microservicios de Shoppy expuestos vía gateway.
 
-## Datos para Pruebas
-   - "email": "admin@gmail.com"
-    "password": "1234"
-    "rol": "admin"
+## Tecnologías
+- React 18 + Vite
+- React Router
+- TanStack Query (fetching/caching)
+- Axios para HTTP
+- Bootstrap y estilos locales
+- Karma + Jasmine + Testing Library para pruebas unitarias
 
-   - "email": "omar@duoc.cl"
-    "password": "1234"
-    "rol": "cliente"
+## APIs consumidas
+- Gateway Shoppy: productos, categorías, unidades, auth/login-register, usuarios, regiones/comunas.
+- Repo backend: https://github.com/OmarNietoc/Shoppy
 
-## Alcance
-- Home:
-  - Render de cards y títulos
-  - Precios y etiquetas (Oferta/Nuevo)
-  - Fetch de productos (mock)
-- Login:
-  - Render de campos y botón
-  - Validaciones: email inválido, password fuera de rango
-  - Credenciales incorrectas (mensaje de alerta)
-  - Credenciales válidas (llama a login y navega /admin o /)
-  - Interacciones UI: toggle de visibilidad de contraseña
+Configura `VITE_API_URL` apuntando al gateway (ej. `http://localhost:8080` o tu dominio). Si no se define, el frontend usa `http://localhost:8080` por defecto.
 
-## Herramientas
-- Karma 6.4.4 + Jasmine
-- @testing-library/react para consultas y eventos
-- Webpack (babel-loader), ChromeHeadless
-
-## Resultados (ejemplo)
-- Total specs: 12
-- Pasados: 12 / Fallidos: 0
-- Cobertura (si usas karma-coverage):
-  - Lines: 80%
-  - Branches: 70%
-  - Functions: 75%
-  - Statements: 80%
-
-## Brechas / pendientes
-- Cobertura de formularios adicionales (registro / contacto)
-- Tests de errores de red en Login (fetch 500)
-- Pruebas de borde en validadores (e-mails raros, longitudes)
+## Pruebas
+- Ejecutar tests: `npm run test:karma`
+- Tests actuales cubren Home, Productos, Login con mocks de datos y servicios.
